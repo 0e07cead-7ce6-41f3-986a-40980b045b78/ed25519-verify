@@ -1,431 +1,407 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ed25519 留言簽名驗證（官方公鑰）</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      max-width: 800px;
-      margin: 20px auto;
-      padding: 0 20px;
-      line-height: 1.6;
-    }
-
-    h2 {
-      color: #333;
-      border-bottom: 3px solid #4CAF50;
-      padding-bottom: 10px;
-    }
-
-    .notice {
-      background: #f0f8ff;
-      padding: 15px;
-      border-left: 4px solid #2196F3;
-      margin: 15px 0;
-      font-size: 14px;
-      color: #555;
-    }
-
-    .warning {
-      background: #fff3cd;
-      border-left-color: #ffc107;
-    }
-
-    label {
-      display: block;
-      font-weight: bold;
-      margin-top: 15px;
-      color: #333;
-    }
-
-    textarea {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      border: 2px solid #ddd;
-      border-radius: 4px;
-      font-family: 'Courier New', monospace;
-      font-size: 14px;
-      box-sizing: border-box;
-      transition: border-color 0.3s, background-color 0.3s;
-    }
-
-    textarea:focus {
-      outline: none;
-      border-color: #4CAF50;
-    }
-
-    textarea[readonly] {
-      background-color: #f5f5f5;
-      cursor: default;
-    }
-
-    .hash-match {
-      border-color: #4CAF50 !important;
-      background-color: #e8f5e9 !important;
-    }
-
-    .hash-mismatch {
-      border-color: #f44336 !important;
-      background-color: #ffebee !important;
-    }
-
-    button {
-      background-color: #4CAF50;
-      color: white;
-      padding: 12px 24px;
-      font-size: 16px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-      margin-top: 10px;
-    }
-
-    button:hover {
-      background-color: #45a049;
-    }
-
-    button:active {
-      transform: scale(0.98);
-    }
-
-    #result {
-      font-weight: bold;
-      margin-top: 20px;
-      padding: 15px;
-      border-radius: 4px;
-      font-size: 16px;
-      display: none;
-    }
-
-    .result-valid {
-      background-color: #d4edda;
-      color: #155724;
-      border: 2px solid #c3e6cb;
-      display: block;
-    }
-
-    .result-invalid {
-      background-color: #f8d7da;
-      color: #721c24;
-      border: 2px solid #f5c6cb;
-      display: block;
-    }
-
-    code {
-      background: #f4f4f4;
-      padding: 2px 6px;
-      border-radius: 3px;
-      font-family: 'Courier New', monospace;
-      font-size: 13px;
-      word-break: break-all;
-    }
-
-    .key-info {
-      background: #f9f9f9;
-      padding: 15px;
-      border-radius: 4px;
-      margin: 15px 0;
-    }
-
-    hr {
-      border: none;
-      border-top: 2px solid #eee;
-      margin: 30px 0;
-    }
-
-    .example-section {
-      background: #f0f8f0;
-      padding: 15px;
-      border-radius: 4px;
-      margin: 15px 0;
-    }
-
-    .example-btn {
-      background-color: #2196F3;
-      margin-left: 10px;
-      padding: 8px 16px;
-      font-size: 14px;
-    }
-
-    .example-btn:hover {
-      background-color: #0b7dda;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ed25519 留言簽名驗證（官方公鑰）</title>
+<style>
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 0 20px;
+  line-height: 1.6;
+}
+h2 {
+  color: #333;
+  border-bottom: 3px solid #4CAF50;
+  padding-bottom: 10px;
+}
+.notice {
+  background: #f0f8ff;
+  padding: 15px;
+  border-left: 4px solid #2196F3;
+  margin: 15px 0;
+  font-size: 14px;
+  color: #555;
+}
+.warning {
+  background: #fff3cd;
+  border-left-color: #ffc107;
+}
+label {
+  display: block;
+  font-weight: bold;
+  margin-top: 15px;
+  color: #333;
+}
+textarea {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: border-color 0.3s, background-color 0.3s;
+}
+textarea:focus {
+  outline: none;
+  border-color: #4CAF50;
+}
+textarea[readonly] {
+  background-color: #f5f5f5;
+  cursor: default;
+}
+.hash-match {
+  border-color: #4CAF50 !important;
+  background-color: #e8f5e9 !important;
+}
+.hash-mismatch {
+  border-color: #f44336 !important;
+  background-color: #ffebee !important;
+}
+button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 12px 24px;
+  font-size: 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-top: 10px;
+}
+button:hover {
+  background-color: #45a049;
+}
+button:active {
+  transform: scale(0.98);
+}
+#result {
+  font-weight: bold;
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 4px;
+  font-size: 16px;
+  display: none;
+}
+.result-valid {
+  background-color: #d4edda;
+  color: #155724;
+  border: 2px solid #c3e6cb;
+  display: block;
+}
+.result-invalid {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 2px solid #f5c6cb;
+  display: block;
+}
+code {
+  background: #f4f4f4;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  word-break: break-all;
+}
+.key-info {
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 4px;
+  margin: 15px 0;
+}
+hr {
+  border: none;
+  border-top: 2px solid #eee;
+  margin: 30px 0;
+}
+.example-section {
+  background: #f0f8f0;
+  padding: 15px;
+  border-radius: 4px;
+  margin: 15px 0;
+}
+.example-btn {
+  background-color: #2196F3;
+  margin-left: 10px;
+  padding: 8px 16px;
+  font-size: 14px;
+}
+.example-btn:hover {
+  background-color: #0b7dda;
+}
+</style>
 </head>
-
 <body>
-  <h2>Ed25519 留言簽名驗證工具</h2>
+<h2>Ed25519 留言簽名驗證工具</h2>
 
-  <div class="notice">
-    <strong>📌 說明</strong><br>
-    本頁使用<strong>官方內嵌公鑰</strong>驗證留言簽名。<br>
-    使用者無需、也無法自行指定公鑰，確保驗證安全性。<br>
-    <strong>🔒 安全性：</strong>使用 Web Crypto API（瀏覽器原生支援）。
-  </div>
+<div class="notice">
+<strong>📌 說明</strong><br>
+本頁使用<strong>官方內嵌公鑰</strong>驗證留言簽名。<br>
+使用者無需、也無法自行指定公鑰，確保驗證安全性。<br>
+<strong>🔒 安全性：</strong>使用 Web Crypto API（瀏覽器原生支援）。
+</div>
 
-  <div class="notice warning">
-    <strong>⚠️ 重要提醒</strong><br>
-    • 留言原文必須<strong>逐字相符</strong>（包括所有空格、換行符號）<br>
-    • 簽名格式為<strong>標準 Base64</strong>（使用 + 和 / 字符）<br>
-    • Ed25519 簽名固定長度為 64 bytes（Base64 編碼後為 88 字符）
-  </div>
+<div class="notice warning">
+<strong>⚠️ 重要提醒</strong><br>
+• 留言原文必須<strong>逐字相符</strong>（包括所有空格、換行符號）<br>
+• 簽名格式為<strong>標準 Base64</strong>（使用 + 和 / 字符）<br>
+• Ed25519 簽名固定長度為 64 bytes（Base64 編碼後為 88 字符）
+</div>
 
-  <label for="message">留言原文（UTF-8）</label>
-  <textarea id="message" rows="6" placeholder="請輸入需要驗證的留言原文..." oninput="calculateMessageHash()"></textarea>
+<label for="message">留言原文（UTF-8）</label>
+<textarea id="message" rows="6" placeholder="請輸入需要驗證的留言原文..." oninput="calculateMessageHash()"></textarea>
 
-  <label for="messageHash">留言原文 SHA-256 Hash（用於驗證訊息完整性）</label>
-  <textarea id="messageHash" rows="2" readonly placeholder="輸入留言後將自動計算 SHA-256..."></textarea>
+<label for="messageHash">留言原文 SHA-256 Hash（用於驗證訊息完整性）</label>
+<textarea id="messageHash" rows="2" readonly placeholder="輸入留言後將自動計算 SHA-256..."></textarea>
 
-  <label for="expectedHash">留言原文的 SHA-256（貼上以進行比對）</label>
-  <textarea id="expectedHash" rows="2" placeholder="貼上預期的 SHA-256 雜湊值進行比對..." oninput="compareHashes()"></textarea>
+<label for="expectedHash">留言原文的 SHA-256（貼上以進行比對）</label>
+<textarea id="expectedHash" rows="2" placeholder="貼上預期的 SHA-256 雜湊值進行比對..." oninput="compareHashes()"></textarea>
 
-  <label for="signature">簽名（Base64 格式）</label>
-  <textarea id="signature" rows="3" placeholder="請輸入 Base64 格式的簽名..."></textarea>
+<label for="signature">簽名（Base64 格式）</label>
+<textarea id="signature" rows="3" placeholder="請輸入 Base64 格式的簽名..."></textarea>
 
-  <button onclick="verify()">🔍 驗證簽名</button>
-  <button class="example-btn" onclick="loadExample()">📝 載入測試範例</button>
+<button onclick="verify()">🔍 驗證簽名</button>
+<button class="example-btn" onclick="loadExample()">📝 載入測試範例</button>
 
-  <div id="result"></div>
+<div id="result"></div>
 
-  <hr>
+<hr>
 
-  <div class="example-section">
-    <strong>🧪 測試範例</strong><br>
-    點擊「載入測試範例」按鈕可自動填入以下內容進行測試：<br><br>
-    <strong>留言：</strong><code>Hello, World!</code><br>
-    <strong>簽名：</strong><code>（需由官方私鑰生成的有效簽名）</code>
-  </div>
+<div class="example-section">
+<strong>🧪 測試範例</strong><br>
+點擊「載入測試範例」按鈕可自動填入以下內容進行測試：<br><br>
+<strong>留言：</strong><code>Hello, World!</code><br>
+<strong>簽名：</strong><code>（需由官方私鑰生成的有效簽名）</code>
+</div>
 
-  <div class="key-info">
-    <strong>🔑 官方公鑰資訊</strong><br><br>
-    <strong>公鑰（Base64）：</strong><br>
-    <code>G1wkVr/RzU/rFKr6pkxz3ZdLoIXCk7LKvjVHzIDA+CM=</code><br><br>
-    <strong>公鑰指紋（SHA-256）：</strong><br>
-    <code>F0F266E24ABBF0FF33737C83F0DD1E5ED333E92BC1E7DE6186CCC0C562FC14B0</code>
-  </div>
+<div class="key-info">
+<strong>🔑 官方公鑰資訊</strong><br><br>
+<strong>公鑰（Base64）：</strong><br>
+<code>G1wkVr/RzU/rFKr6pkxz3ZdLoIXCk7LKvjVHzIDA+CM=</code><br><br>
+<strong>公鑰指紋（SHA-256）：</strong><br>
+<code>F0F266E24ABBF0FF33737C83F0DD1E5ED333E92BC1E7DE6186CCC0C562FC14B0</code>
+</div>
 
-  <script>
-    const PUBLIC_KEY_B64 = "G1wkVr/RzU/rFKr6pkxz3ZdLoIXCk7LKvjVHzIDA+CM=";
+<script>
+const PUBLIC_KEY_B64 = "G1wkVr/RzU/rFKr6pkxz3ZdLoIXCk7LKvjVHzIDA+CM=";
 
-    // Base64 解碼函數
-    function base64ToBytes(base64) {
-      const binaryString = atob(base64);
-      const bytes = new Uint8Array(binaryString.length);
-      for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-      }
-      return bytes;
+// Base64 解碼函數
+function base64ToBytes(base64) {
+  const binaryString = atob(base64);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes;
+}
+
+// Ed25519 驗證函數（使用 Web Crypto API）
+async function verify() {
+  console.log("verify() 函數被調用");
+  const resultEl = document.getElementById("result");
+  
+  // 檢查瀏覽器是否支援 Web Crypto API
+  if (!window.crypto || !window.crypto.subtle) {
+    console.error("不支援 Web Crypto API");
+    showResult("❌ 您的瀏覽器不支援 Web Crypto API", false);
+    return;
+  }
+  
+  console.log("Web Crypto API 可用");
+  
+  try {
+    const message = document.getElementById("message").value;
+    const signatureB64 = document.getElementById("signature").value.trim();
+    
+    // 輸入驗證
+    if (!message) {
+      showResult("❌ 請輸入留言原文", false);
+      return;
     }
-
-    // Ed25519 驗證函數（使用 Web Crypto API）
-    async function verify() {
-      console.log("verify() 函數被調用");
-      const resultEl = document.getElementById("result");
-
-      // 檢查瀏覽器是否支援 Web Crypto API
-      if (!window.crypto || !window.crypto.subtle) {
-        console.error("不支援 Web Crypto API");
-        showResult("❌ 您的瀏覽器不支援 Web Crypto API", false);
-        return;
-      }
-
-      console.log("Web Crypto API 可用");
-
-      try {
-        const message = document.getElementById("message").value;
-        const signatureB64 = document.getElementById("signature").value.trim();
-
-        // 輸入驗證
-        if (!message) {
-          showResult("❌ 請輸入留言原文", false);
-          return;
-        }
-
-        if (!signatureB64) {
-          showResult("❌ 請輸入簽名", false);
-          return;
-        }
-
-        // 檢查 Base64 格式
-        if (!/^[A-Za-z0-9+/]+=*$/.test(signatureB64)) {
-          showResult("❌ 簽名格式錯誤（應為標準 Base64 格式）", false);
-          return;
-        }
-
-        // 解碼
-        let signature, publicKeyBytes;
-
-        try {
-          signature = base64ToBytes(signatureB64);
-          publicKeyBytes = base64ToBytes(PUBLIC_KEY_B64);
-        } catch (e) {
-          showResult("❌ Base64 解碼失敗：" + e.message, false);
-          return;
-        }
-
-        // 檢查簽名長度
-        if (signature.length !== 64) {
-          showResult(
-            `❌ 簽名長度錯誤（Ed25519 簽名應為 64 bytes，實際為 ${signature.length} bytes）`,
-            false
-          );
-          return;
-        }
-
-        // 檢查公鑰長度
-        if (publicKeyBytes.length !== 32) {
-          showResult("❌ 公鑰長度錯誤", false);
-          return;
-        }
-
-        // 將留言轉為 Uint8Array
-        const messageBytes = new TextEncoder().encode(message);
-
-        // 匯入公鑰
-        const publicKey = await crypto.subtle.importKey(
-          "raw",
-          publicKeyBytes,
-          {
-            name: "Ed25519",
-          },
-          false,
-          ["verify"]
-        );
-
-        // 驗證簽名
-        const isValid = await crypto.subtle.verify(
-          "Ed25519",
-          publicKey,
-          signature,
-          messageBytes
-        );
-
-        if (isValid) {
-          showResult("✅ 簽名有效（Verified）<br>此留言由官方私鑰簽署，確認真實可信", true);
-        } else {
-          showResult("❌ 簽名無效（Invalid Signature）<br>簽名與留言內容不符，或非官方簽署", false);
-        }
-
-      } catch (e) {
-        console.error("驗證錯誤：", e);
-
-        // 特別處理不支援 Ed25519 的情況
-        if (e.message && e.message.includes("Ed25519")) {
-          showResult("❌ 您的瀏覽器不支援 Ed25519 簽名驗證<br>請使用最新版 Chrome、Edge 或 Firefox", false);
-        } else {
-          showResult("❌ 驗證過程發生錯誤：" + (e.message || "未知錯誤"), false);
-        }
-      }
+    
+    if (!signatureB64) {
+      showResult("❌ 請輸入簽名", false);
+      return;
     }
-
-    function showResult(message, isValid) {
-      console.log("showResult 被調用:", message, isValid);
-      const resultEl = document.getElementById("result");
-      if (!resultEl) {
-        console.error("找不到 result 元素");
-        return;
-      }
-      resultEl.innerHTML = message;
-      resultEl.className = isValid ? "result-valid" : "result-invalid";
-      resultEl.style.display = "block";
+    
+    // 檢查 Base64 格式
+    if (!/^[A-Za-z0-9+/]+=*$/.test(signatureB64)) {
+      showResult("❌ 簽名格式錯誤（應為標準 Base64 格式）", false);
+      return;
     }
-
-    function loadExample() {
-      document.getElementById("message").value = "Hello, World!";
-      document.getElementById("signature").value = "";
-      calculateMessageHash();
-      showResult("ℹ️ 測試範例已載入，請輸入有效的簽名進行驗證", false);
+    
+    // 解碼
+    let signature, publicKeyBytes;
+    
+    try {
+      signature = base64ToBytes(signatureB64);
+      publicKeyBytes = base64ToBytes(PUBLIC_KEY_B64);
+    } catch (e) {
+      showResult("❌ Base64 解碼失敗：" + e.message, false);
+      return;
     }
-
-    // 計算留言的 SHA-256 雜湊值
-    async function calculateMessageHash() {
-      const message = document.getElementById("message").value;
-      const messageHashEl = document.getElementById("messageHash");
-
-      if (!message) {
-        messageHashEl.value = "";
-        return;
-      }
-
-      try {
-        const encoder = new TextEncoder();
-        const data = encoder.encode(message);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-
-        messageHashEl.value = hashHex.toUpperCase();
-        compareHashes();
-      } catch (e) {
-        console.error("計算雜湊失敗:", e);
-        messageHashEl.value = "計算失敗";
-      }
+    
+    // 檢查簽名長度
+    if (signature.length !== 64) {
+      showResult(
+        `❌ 簽名長度錯誤（Ed25519 簽名應為 64 bytes，實際為 ${signature.length} bytes）`,
+        false
+      );
+      return;
     }
-
-    // 比對雜湊值
-    function compareHashes() {
-      const messageHash = document.getElementById("messageHash").value.trim().toUpperCase();
-      const expectedHash = document.getElementById("expectedHash").value.trim().toUpperCase();
-      const expectedHashEl = document.getElementById("expectedHash");
-
-      // 移除所有比對樣式
-      expectedHashEl.classList.remove("hash-match", "hash-mismatch");
-
-      if (!expectedHash || !messageHash) {
-        return;
-      }
-
-      // 比對雜湊值
-      if (messageHash === expectedHash) {
-        expectedHashEl.classList.add("hash-match");
-      } else {
-        expectedHashEl.classList.add("hash-mismatch");
-      }
+    
+    // 檢查公鑰長度
+    if (publicKeyBytes.length !== 32) {
+      showResult("❌ 公鑰長度錯誤", false);
+      return;
     }
+    
+    // 將留言轉為 Uint8Array
+    const messageBytes = new TextEncoder().encode(message);
+    
+    // 匯入公鑰
+    const publicKey = await crypto.subtle.importKey(
+      "raw",
+      publicKeyBytes,
+      {
+        name: "Ed25519",
+      },
+      false,
+      ["verify"]
+    );
+    
+    // 驗證簽名
+    const isValid = await crypto.subtle.verify(
+      "Ed25519",
+      publicKey,
+      signature,
+      messageBytes
+    );
+    
+    if (isValid) {
+      showResult("✅ 簽名有效（Verified）<br>此留言由官方私鑰簽署，確認真實可信", true);
+    } else {
+      showResult("❌ 簽名無效（Invalid Signature）<br>簽名與留言內容不符，或非官方簽署", false);
+    }
+    
+  } catch (e) {
+    console.error("驗證錯誤：", e);
+    
+    // 特別處理不支援 Ed25519 的情況
+    if (e.message && e.message.includes("Ed25519")) {
+      showResult("❌ 您的瀏覽器不支援 Ed25519 簽名驗證<br>請使用最新版 Chrome、Edge 或 Firefox", false);
+    } else {
+      showResult("❌ 驗證過程發生錯誤：" + (e.message || "未知錯誤"), false);
+    }
+  }
+}
 
-    // 頁面載入時檢查瀏覽器支援
-    window.addEventListener('load', async () => {
-      if (!window.crypto || !window.crypto.subtle) {
-        showResult("❌ 您的瀏覽器不支援 Web Crypto API，無法使用此工具", false);
-      } else {
-        console.log("✓ Web Crypto API 可用");
+function showResult(message, isValid) {
+  console.log("showResult 被調用:", message, isValid);
+  const resultEl = document.getElementById("result");
+  if (!resultEl) {
+    console.error("找不到 result 元素");
+    return;
+  }
+  resultEl.innerHTML = message;
+  resultEl.className = isValid ? "result-valid" : "result-invalid";
+  resultEl.style.display = "block";
+}
 
-        // 計算並顯示頁面完整性雜湊
-        await calculatePageIntegrity();
-      }
-    });
+function loadExample() {
+  document.getElementById("message").value = "Hello, World!";
+  document.getElementById("signature").value = "";
+  calculateMessageHash();
+  showResult("ℹ️ 測試範例已載入，請輸入有效的簽名進行驗證", false);
+}
 
-    // 計算頁面完整性雜湊值
-    async function calculatePageIntegrity() {
-      try {
-        const htmlContent = document.documentElement.outerHTML;
-        const encoder = new TextEncoder();
-        const data = encoder.encode(htmlContent);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+// 計算留言的 SHA-256 雜湊值
+async function calculateMessageHash() {
+  const message = document.getElementById("message").value;
+  const messageHashEl = document.getElementById("messageHash");
+  
+  if (!message) {
+    messageHashEl.value = "";
+    return;
+  }
+  
+  try {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    
+    messageHashEl.value = hashHex.toUpperCase();
+    compareHashes();
+  } catch (e) {
+    console.error("計算雜湊失敗:", e);
+    messageHashEl.value = "計算失敗";
+  }
+}
 
-        console.log("📄 頁面 SHA-256:", hashHex.toUpperCase());
+// 比對雜湊值
+function compareHashes() {
+  const messageHash = document.getElementById("messageHash").value.trim().toUpperCase();
+  const expectedHash = document.getElementById("expectedHash").value.trim().toUpperCase();
+  const expectedHashEl = document.getElementById("expectedHash");
+  
+  // 移除所有比對樣式
+  expectedHashEl.classList.remove("hash-match", "hash-mismatch");
+  
+  if (!expectedHash || !messageHash) {
+    return;
+  }
+  
+  // 比對雜湊值
+  if (messageHash === expectedHash) {
+    expectedHashEl.classList.add("hash-match");
+  } else {
+    expectedHashEl.classList.add("hash-mismatch");
+  }
+}
 
-        // 顯示在頁面上
-        const integrityDiv = document.createElement('div');
-        integrityDiv.style.cssText = 'margin-top: 20px; padding: 10px; background: #e8f5e9; border-left: 4px solid #4caf50; font-size: 12px;';
-        integrityDiv.innerHTML = `
+// 頁面載入時檢查瀏覽器支援
+window.addEventListener('load', async () => {
+  if (!window.crypto || !window.crypto.subtle) {
+    showResult("❌ 您的瀏覽器不支援 Web Crypto API，無法使用此工具", false);
+  } else {
+    console.log("✓ Web Crypto API 可用");
+    
+    // 計算並顯示頁面完整性雜湊
+    await calculatePageIntegrity();
+  }
+});
+
+// 計算頁面完整性雜湊值
+async function calculatePageIntegrity() {
+  try {
+    const htmlContent = document.documentElement.outerHTML;
+    const encoder = new TextEncoder();
+    const data = encoder.encode(htmlContent);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    
+    console.log("📄 頁面 SHA-256:", hashHex.toUpperCase());
+    
+    // 顯示在頁面上
+    const integrityDiv = document.createElement('div');
+    integrityDiv.style.cssText = 'margin-top: 20px; padding: 10px; background: #e8f5e9; border-left: 4px solid #4caf50; font-size: 12px;';
+    integrityDiv.innerHTML = `
       <strong>🔒 頁面完整性驗證</strong><br>
       SHA-256: <code style="font-size: 11px; word-break: break-all;">${hashHex.toUpperCase()}</code><br>
       <small style="color: #666;">此雜湊值可用於驗證檔案未被竄改</small>
     `;
-        document.body.appendChild(integrityDiv);
-      } catch (e) {
-        console.error("計算頁面雜湊失敗:", e);
-      }
-    }
-  </script>
+    document.body.appendChild(integrityDiv);
+  } catch (e) {
+    console.error("計算頁面雜湊失敗:", e);
+  }
+}
+</script>
 </body>
-
 </html>
