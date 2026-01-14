@@ -379,6 +379,12 @@
     </label>
     <textarea id="message" rows="6" placeholder="請輸入需要驗證的留言原文..." oninput="calculateMessageHash()"></textarea>
 
+    <div id="newlineWarning" style="display: none;" class="notice warning">
+      <strong>⚠️ 檢測到換行符號</strong><br>
+      <span id="newlineType"></span><br>
+      驗證時將自動標準化為 LF (\n) 格式
+    </div>
+
     <label for="messageHash">
       留言原文 SHA-256 Hash(用於驗證訊息完整性)
       <span class="tooltip" data-tip="自動計算,用於確認內容未被篡改">ℹ️</span>
@@ -494,6 +500,26 @@
       return '驗證過程發生錯誤';
     }
 
+    // 標準化換行符號
+    function normalizeNewlines(text, target = 'LF') {
+      if (target === 'LF') {
+        // 統一轉換為 LF (\n)
+        return text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+      } else if (target === 'CRLF') {
+        // 統一轉換為 CRLF (\r\n)
+        return text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(/\n/g, '\r\n');
+      }
+      return text;
+    }
+
+    // 檢測換行類型
+    function detectNewlineType(text) {
+      if (text.includes('\r\n')) return 'CRLF';
+      if (text.includes('\n')) return 'LF';
+      if (text.includes('\r')) return 'CR';
+      return 'none';
+    }
+
     // Ed25519 驗證函數(使用 Web Crypto API)
     async function verify() {
       console.log("verify() 函數被調用");
@@ -515,7 +541,14 @@
       verifyBtn.innerHTML = '🔍 驗證中<span class="loading"></span>';
 
       try {
-        const message = document.getElementById("message").value;
+        let message = document.getElementById("message").value;
+
+        // 檢測並警告換行類型
+        const newlineType = detectNewlineType(message);
+        console.log("檢測到換行類型:", newlineType);
+
+        // 標準化為 LF (與大多數簽名系統一致)
+        message = normalizeNewlines(message, 'LF');
         const signatureB64 = document.getElementById("signature").value.trim();
 
         // 輸入驗證
@@ -672,12 +705,32 @@
 
       if (!message) {
         messageHashEl.value = "";
+        document.getElementById("newlineWarning").style.display = "none";
         return;
       }
 
+      // 檢測換行類型並顯示警告
+      const newlineType = detectNewlineType(message);
+      const warningEl = document.getElementById("newlineWarning");
+      const typeEl = document.getElementById("newlineType");
+
+      if (newlineType !== 'none') {
+        warningEl.style.display = "block";
+        const typeNames = {
+          'CRLF': 'CRLF (\\r\\n) - Windows 風格換行',
+          'LF': 'LF (\\n) - Unix/Linux/macOS 風格換行',
+          'CR': 'CR (\\r) - 舊 Mac 風格換行'
+        };
+        typeEl.textContent = `檢測到: ${typeNames[newlineType]}`;
+      } else {
+        warningEl.style.display = "none";
+      }
+
       try {
+        // 標準化後計算 Hash
+        const normalizedMessage = normalizeNewlines(message, 'LF');
         const encoder = new TextEncoder();
-        const data = encoder.encode(message);
+        const data = encoder.encode(normalizedMessage);
         const hashBuffer = await crypto.subtle.digest('SHA-256', data);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
